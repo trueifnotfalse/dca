@@ -1,0 +1,10 @@
+---
+name: str()
+version: enum(1.0)
+variables: map(str(), str())
+compose: include('compose', required=True)
+
+---
+compose:
+  include: str()
+  replace: map(required=False)
