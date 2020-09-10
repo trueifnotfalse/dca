@@ -3,12 +3,10 @@ import os
 import yamale
 import yaml
 
-from dca.arguments import Arguments
 from dca.exceptions import YAMLException, ConfigException
 
 
 class Config:
-    __arguments: Arguments = None
     __constants: dict = {}
     __config_path: str = '.dca.yaml'
     project_path: str = None
@@ -16,13 +14,7 @@ class Config:
     config_path: str = None
     project_name: str = None
 
-    def __init__(self, arguments: Arguments):
-        self.__arguments = arguments
-
     def load(self) -> dict:
-        if self.__arguments.config_path:
-            self.__config_path = self.__arguments.config_path
-
         absolute_config_path = self.__get_config_absolute_path(self.__config_path)
         if not absolute_config_path:
             raise ConfigException('Cannot find config')
