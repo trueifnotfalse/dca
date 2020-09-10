@@ -33,3 +33,12 @@ def dict_merge(dst, src):
 
 def insert_str(string: str, str_to_insert: str, index: int) -> str:
     return string[:index] + str_to_insert + string[index:]
+
+def run_command_in_foreground(command, output = True)-> int:
+    if output:
+        print('running command: ' + command)
+    try:
+        exit_code = os.system(command)
+        return int(exit_code)
+    except Exception as e:
+        raise CommandException('error occurred when executing command in foreground ' + str(e))

@@ -3,8 +3,15 @@ name: str()
 version: enum(1.0)
 variables: map(str(), str())
 compose: include('compose', required=True)
+command: map(str, include('command', required=True))
 
 ---
 compose:
   include: str()
-  replace: map(required=False)
+
+---
+command:
+  in: enum('local', 'container')
+  container: str()
+  interpreter: enum('sh')
+  content: any(str(), list(str()))

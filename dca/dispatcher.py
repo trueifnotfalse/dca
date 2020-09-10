@@ -8,52 +8,39 @@ from compose.cli.main import TopLevelCommand, setup_console_handler, console_han
 from dca.arguments import Arguments
 from dca.config.config import Config
 from compose.cli.main import main
+from dca.utils import run_command_in_foreground
+
 
 class Dispatcher:
     _arguments: Arguments = Arguments()
     _config: Config = None
 
     def run(self):
-        self._arguments.parse()
+        argument = self._arguments.parse()
         self._config = Config()
         config = self._config.load()
-        print(config)
-        exit(0)
-        sys.argv.insert(1,'-p')
-        sys.argv.insert(2,'optima-delivery-back')
-        sys.argv.insert(3,'-f')
-        sys.argv.insert(4,'develop/docker-compose.yml')
-        # print(sys.argv)
-        # exit(0)
-        main()
-        # print(sys.argv)
-        # exit(0)
+        if argument in config['command']:
+            self._run_command(argument, config)
+        else:
+            self._run_compose_command(config)
 
-
-        # self.__command_line_mode(config)
-
-    def __command_line_mode(self, config):
-        path = config['compose']['include']
+    def _run_command(self, command: str, config: dict):
+        path =config['compose']['include']
         with open(path, 'r') as f:
             file = yaml.load(f)
+        if 'container' == config['command'][command]['in']:
+            container = config['command'][command]['container']
+            cn = file['services'][container]['container_name']
+            content = config['command'][command]['content']
+            if isinstance(content, list):
+                for c in content:
+                    cmd = 'docker exec -i '+cn+' '+c
+                    run_command_in_foreground(cmd)
 
-        #print(file)
-        dispatcher = DocoptDispatcher(
-            TopLevelCommand,
-            {'options_first': True}
-        )
 
-        options, handler, command_options = dispatcher.parse(sys.argv[1:])
-        options['COMMAND'] = 'pull'
-        #options['ARGS']= ['-d']
-        options['--file'] = ['develop/docker-compose.yml']
-        setup_console_handler(console_handler,
-                              options.get('--verbose'),
-                              set_no_color_if_clicolor(options.get('--no-ansi')),
-                              options.get("--log-level"))
-        setup_parallel_logger(set_no_color_if_clicolor(options.get('--no-ansi')))
-        print(command_options)
-        print(options)
-        c = functools.partial(perform_command, options, handler, command_options)
-        c()
-
+    def _run_compose_command(self, config: dict):
+        sys.argv.insert(1, '-p')
+        sys.argv.insert(2, config['name'])
+        sys.argv.insert(3, '-f')
+        sys.argv.insert(4, config['compose']['include'])
+        main()
