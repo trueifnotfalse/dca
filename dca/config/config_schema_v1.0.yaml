@@ -11,7 +11,7 @@ compose:
 
 ---
 command:
-  in: enum('local', 'container')
+  env: enum('local', 'container', 'self')
   container: str()
   interpreter: enum('sh')
   content: any(str(), list(str()))

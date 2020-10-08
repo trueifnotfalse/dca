@@ -28,7 +28,7 @@ class Dispatcher:
         path =config['compose']['include']
         with open(path, 'r') as f:
             file = yaml.load(f)
-        if 'container' == config['command'][command]['in']:
+        if 'container' == config['command'][command]['env']:
             container = config['command'][command]['container']
             cn = file['services'][container]['container_name']
             content = config['command'][command]['content']
