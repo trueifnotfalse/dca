@@ -7,7 +7,7 @@ command: map(str, include('command', required=True))
 
 ---
 compose:
-  include: str()
+  include: str(required=True)
 
 ---
 command:

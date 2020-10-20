@@ -7,7 +7,7 @@ from dca.exceptions import YAMLException, ConfigException
 
 
 class Config:
-    __constants: dict = {}
+    __variables: dict = {}
     __config_path: str = '.dca.yaml'
     project_path: str = None
     config_name: str = None
@@ -20,6 +20,8 @@ class Config:
             raise ConfigException('Cannot find config')
         config = self.__load(absolute_config_path)
         self.__validate(config, absolute_config_path)
+        self.__get_variables(config)
+        self.__replace_variables_recursively(config)
         return config
 
     def __get_config_absolute_path(self, config_path: str, path: str = None) -> str:
@@ -36,22 +38,6 @@ class Config:
             self.project_path = path
             return search_path
         return self.__get_config_absolute_path(config_path, os.path.dirname(path))
-
-    def __replace_constants_in_config(self, config):
-        if isinstance(config, str):
-            return self.__replace_constants(config)
-        if isinstance(config, list):
-            for i in range(0, len(config)):
-                config[i] = self.__replace_constants_in_config(config[i])
-        if isinstance(config, dict):
-            for key, value in config.items():
-                config[key] = self.__replace_constants_in_config(value)
-        return config
-
-    def __replace_constants(self, string: str) -> str:
-        for key, value in self.__constants.items():
-            string = string.replace('{{' + key + '}}', value)
-        return string
 
     def __validate(self, config: dict, config_path: str) -> dict:
         if 'version' not in config:
@@ -74,3 +60,23 @@ class Config:
             return file
         except Exception:
             raise YAMLException('error occurred while loading config file')
+
+    def __replace_variables_recursively(self, config):
+        if isinstance(config, str):
+            return self.__replace_constants(config)
+        if isinstance(config, list):
+            for i in range(0, len(config)):
+                config[i] = self.__replace_variables_recursively(config[i])
+        if isinstance(config, dict):
+            for key, value in config.items():
+                config[key] = self.__replace_variables_recursively(value)
+        return config
+
+    def __replace_constants(self, string: str) -> str:
+        for key, value in self.__variables.items():
+            string = string.replace('{{' + key + '}}', value)
+        return string
+
+    def __get_variables(self, config: dict):
+        if 'variables' in config:
+            self.__variables = config['variables']
