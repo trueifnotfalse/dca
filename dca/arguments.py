@@ -6,7 +6,8 @@ class Arguments:
     command: str = None
 
     def parse(self) -> Optional[str]:
-        argv = sys.argv
+        argv = sys.argv.copy()
         if 2 > len(argv):
             return None
-        return argv[1]
+        del argv[0]
+        return ' '.join(argv)

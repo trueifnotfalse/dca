@@ -20,23 +20,28 @@ class Dispatcher:
         self._config = Config()
         config = self._config.load()
         self._command_list = self._create_command_list(config)
-        if argument in self._command_list:
-            self._run_command(argument)
-        else:
-            self._run_compose_command(config)
+        self._run_command(argument, config)
 
-    def _run_command(self, command: str):
-        if self._command_list[command].is_self():
-            for c in self._command_list[command].content:
-                self._run_command(c)
+    def _run_command(self, command: str, config: dict):
+        if command in self._command_list:
+            if self._command_list[command].is_self():
+                for c in self._command_list[command].content:
+                    self._run_command(c, config)
+            else:
+                self._command_list[command].run()
         else:
-            self._command_list[command].run()
+            self._run_compose_command(command, config)
 
-    def _run_compose_command(self, config: dict):
-        sys.argv.insert(1, '-p')
-        sys.argv.insert(2, config['name'])
-        sys.argv.insert(3, '-f')
-        sys.argv.insert(4, config['compose']['include'])
+    def _run_compose_command(self, command: str, config: dict):
+        argv = [
+            sys.argv[0],
+            '-p',
+            config['name'],
+            '-f',
+            config['compose']['include'],
+        ]
+
+        sys.argv = argv + command.split(' ')
         main()
 
     def _create_command_list(self, config: dict) -> dict:
