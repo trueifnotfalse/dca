@@ -15,7 +15,7 @@ class Command(AbstractMagicObject):
         if self.is_container():
             if isinstance(self.content, list):
                 for c in self.content:
-                    cmd = 'docker exec -i ' + self.container + ' ' + c
+                    cmd = 'docker exec -it ' + self.container + ' ' + c
                     run_command_in_foreground(cmd)
 
     def is_self(self):
