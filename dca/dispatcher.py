@@ -1,3 +1,4 @@
+import os
 import sys
 from typing import Dict
 
@@ -7,6 +8,7 @@ from dca.arguments import Arguments
 from dca.command import Command
 from dca.compose import Compose
 from dca.config.config import Config
+from dca.exceptions import FileException
 
 
 class Dispatcher:
@@ -38,7 +40,7 @@ class Dispatcher:
             '-p',
             config['name'],
             '-f',
-            config['compose']['include'],
+            self._get_compose_config_path(config),
         ]
 
         sys.argv = argv + command.split(' ')
@@ -49,3 +51,17 @@ class Dispatcher:
         for command in config['command']:
             command_list[command] = Command(config['command'][command])
         return command_list
+
+    def _get_compose_config_path(self, config: dict) -> str:
+        path = config['compose']['include']
+        if os.path.exists(path):
+            return path
+
+        path = self._get_project_dir() + path
+        if os.path.exists(path):
+            return path
+
+        raise FileException('Cannot find compose config file.')
+
+    def _get_project_dir(self) -> str:
+        return self._config.project_path + '/'

@@ -1,9 +1,8 @@
-from colored import fg
-from urllib.request import urlretrieve
-import subprocess
 import os
+
 import yaml
-from dca.exceptions import CommandException, YAMLException, FileException
+
+from dca.exceptions import CommandException, YAMLException
 
 
 def load_yaml(path):
@@ -34,7 +33,8 @@ def dict_merge(dst, src):
 def insert_str(string: str, str_to_insert: str, index: int) -> str:
     return string[:index] + str_to_insert + string[index:]
 
-def run_command_in_foreground(command, output = True)-> int:
+
+def run_command_in_foreground(command, output = True) -> int:
     if output:
         print('running command: ' + command)
     try:
